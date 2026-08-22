@@ -1,0 +1,23 @@
+{
+  "name": "nexus-agent",
+  "version": "2.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "tsx scripts/test-discord.ts",
+    "dev": "tsx watch scripts/test-discord.ts"
+  },
+  "dependencies": {
+    "@icp-sdk/core": "^6.0.0",
+    "discord.js": "^14.27.0",
+    "dotenv": "^16.6.1",
+    "express": "^4.19.2",
+    "nodemailer": "^9.0.5"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.11.0",
+    "@types/nodemailer": "^6.4.14",
+    "tsx": "^4.7.1",
+    "typescript": "^5.4.5"
+  }
+}
