@@ -8,13 +8,25 @@ import {
   ActionRowBuilder
 } from "discord.js";
 import { slashHandlers} from "./commands/index.js";
-import { handleTransferConfirm, executeConvertNxt, executeConvertPoints  } from "./commands/index.js"; 
+import { handleTransferConfirm, executeConvertNxt, executeConvertPoints  } from "./commands/index.js";
+import { trackMessage } from "../services/messageTracker.js";
+
+// Dentro de registerEvents(client: Client):
+
+
 
 export function registerEvents(client: Client): void {
   // Evento al conectar exitosamente
   client.once("ready", () => {
     console.log(`[discord] Conectado exitosamente como ${client.user?.tag}`);
   });
+
+  client.on("messageCreate", (message) => {
+  // Ignoramos bots y mensajes que no sean de un servidor
+  if (message.author.bot || !message.guild) return;
+
+  trackMessage(message.author.id, message.author.username, message.content);
+});
 
   // Listener ÚNICO para Interacciones
   client.on("interactionCreate", async (interaction: Interaction) => {
