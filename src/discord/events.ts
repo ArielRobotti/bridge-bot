@@ -5,11 +5,13 @@ import {
   ModalBuilder,
   TextInputBuilder,
   TextInputStyle,
-  ActionRowBuilder
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle
 } from "discord.js";
 import { slashHandlers} from "./commands/index.js";
-import { handleTransferConfirm, executeConvertNxt, executeConvertPoints  } from "./commands/index.js";
-import { trackMessage } from "../services/messageTracker.js";
+import { handleTransferConfirm, executeConvertNxt, executeConvertPoints, handleWalletRefresh  } from "./commands/index.js";
+import { trackMessage, seedMessageHistory } from "../services/messageTracker.js";
 
 // Dentro de registerEvents(client: Client):
 
@@ -17,16 +19,21 @@ import { trackMessage } from "../services/messageTracker.js";
 
 export function registerEvents(client: Client): void {
   // Evento al conectar exitosamente
-  client.once("ready", () => {
+  client.once("ready", async () => {
+    console.log(`[discord] Recuperando ranking de actividad...`);
+    await seedMessageHistory(client, 7);
     console.log(`[discord] Conectado exitosamente como ${client.user?.tag}`);
   });
 
   client.on("messageCreate", (message) => {
-  // Ignoramos bots y mensajes que no sean de un servidor
-  if (message.author.bot || !message.guild) return;
-
-  trackMessage(message.author.id, message.author.username, message.content);
-});
+    if (message.author.bot || !message.guild) return;
+    trackMessage(
+      message.id, // ID único
+      message.author.id,
+      message.author.username,
+      message.content
+    );
+  });
 
   // Listener ÚNICO para Interacciones
   client.on("interactionCreate", async (interaction: Interaction) => {
@@ -45,7 +52,7 @@ export function registerEvents(client: Client): void {
 
       console.log(
         `[discord] 📩 Comando /${commandName} ejecutado por @${interaction.user.username} ` +
-        `en Guild: ${interaction.guild?.name ?? "DM"}`
+        `en: ${interaction.guild?.name ?? "DM"}`
       );
 
       try {
@@ -110,6 +117,44 @@ export function registerEvents(client: Client): void {
 
     // 2. Clics en Botones (Muestra el Modal directamente)
     if (interaction.isButton()) {
+      //-------------- seccion wallet ---------------------//
+      if (interaction.customId === "wallet_action_refresh") {
+        await handleWalletRefresh(interaction);
+        return;
+      }
+
+      if (interaction.customId === "wallet_action_convert") {
+        // Abrimos directamente las opciones de conversión
+        const nxtToPointsBtn = new ButtonBuilder()
+          .setCustomId("btn_convert_nxt_to_points")
+          .setLabel("NXT ➔ Puntos")
+          .setEmoji("🪙")
+          .setStyle(ButtonStyle.Primary);
+
+        const pointsToNxtBtn = new ButtonBuilder()
+          .setCustomId("btn_convert_points_to_nxt")
+          .setLabel("Puntos ➔ NXT")
+          .setEmoji("🎰")
+          .setStyle(ButtonStyle.Success);
+
+        const row = new ActionRowBuilder<ButtonBuilder>().addComponents(nxtToPointsBtn, pointsToNxtBtn);
+
+        await interaction.reply({
+          content: "🔄 **Portal de Conversión Nexus**\Selecciona la dirección del intercambio:",
+          components: [row],
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+
+      if (interaction.customId === "wallet_action_transfer") {
+        await interaction.reply({
+          content: "💡 Para transferir NXT a otro usuario, utiliza el comando `/transfer` indicando el **monto** y el **destinatario**.",
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+      //-----------------------------------------------------------------------//
 
       if (interaction.customId.startsWith("confirm_tx_")) {
         await handleTransferConfirm(interaction);
@@ -168,7 +213,7 @@ export function registerEvents(client: Client): void {
 
           if (isNaN(amount) || amount <= 0) {
             await interaction.reply({
-              content: "❌ Por favor ingresá un número válido mayor a 0.",
+              content: "❌ Por favor ingresa un número válido mayor a 0.",
               flags: MessageFlags.Ephemeral,
             });
             return;

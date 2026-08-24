@@ -53,7 +53,7 @@ async function resolveSubaccount(principal: Principal): Promise<Uint8Array> {
 }
 
 // Balance NXST de un usuario, consultado directamente en el ledger.
-export async function getNxstBalance(principal: Principal): Promise<bigint> {
+export async function getNxtBalance(principal: Principal): Promise<bigint> {
   const subaccount = await resolveSubaccount(principal);
   const actor = await getLedgerActor();
 

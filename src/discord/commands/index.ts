@@ -13,6 +13,9 @@ import { handleGetAccount } from "./account.js";
 import { handleRenameChannel } from "./rename_channel.js";
 import { handleTopPosters } from "./top-posters.js";
 import { handleCommands } from "./help.js";
+import { handleWallet, handleWalletRefresh } from "./wallet.js";
+import { handleHistory } from "./historial.js";
+import { handleExportTransactions } from "./exportTransactions.js";
 
 export type SlashCommandBuilderResult = 
   | SlashCommandBuilder 
@@ -85,6 +88,21 @@ export const commandDefinitions: CommandDefinition[] = [
           .setMinValue(1)
       ),
   },
+  {
+    name: "wallet",
+    description: "Abre tu billetera interactiva con saldos de NXT y Puntos de Casino.",
+    handler: handleWallet,
+  },
+  {
+    name: "historial",
+    description: "Tu historial de transacciones",
+    handler: handleHistory,
+  },
+  {
+    name: "export-transactions",
+    description: "Exporta todo el registro de transacciones en formato CSV (Solo SuperAdmin).",
+    handler: handleExportTransactions,
+  },
 ];
 
 // Mapeos para Discord REST API y Router
@@ -109,4 +127,6 @@ export {
   handleTransferConfirm,
   executeConvertNxt,
   executeConvertPoints,
+  handleWalletRefresh,
+  handleExportTransactions
 };

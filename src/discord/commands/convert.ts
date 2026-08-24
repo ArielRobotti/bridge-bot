@@ -6,9 +6,9 @@ import {
   ButtonStyle,
   MessageFlags,
 } from "discord.js";
-import { getDiscordUser, ensureNexusRole, bridgeBurnNXTFrom, bridgeMintNXT } from "../helpers.js";
+import { getDiscordUser, ensureNexusRole, bridgeBurnNXTFrom, bridgeMintNXT, formatTransferError } from "../helpers.js";
 import { NXT_DECIMALS, CASINO_CONVERSION_RATE, SPREAD_BPS, BPS_DIVISOR } from "../../config/constants.js";
-import { formatTransferError } from "../helpers.js";
+import { logTransaction } from "../../services/transactionLogger.js";
 
 const UNBELIEVABOAT_TOKEN = process.env.UNBELIEVABOAT_TOKEN;
 
@@ -127,6 +127,17 @@ export async function executeConvertNxt(
     try {
       if (!interaction.guildId) throw new Error("Comando no ejecutado en un servidor.");
       await modifyUnbelievaBoatBalance(interaction.guildId, interaction.user.id, casinoPoints);
+      
+      // Registro de transacción exitosa
+      logTransaction({
+        userId: interaction.user.id,
+        type: "CONVERT_NXT_TO_POINTS",
+        amountNxt: amountNumber,
+        amountPoints: casinoPoints,
+        blockIndex: burnResult.blockIndex?.toString(),
+        status: "SUCCESS",
+        timestamp: Date.now(),
+      });
     } catch (apiErr) {
       console.error("[UnbelievaBoat API Error]:", apiErr);
       await interaction.editReply(
@@ -215,6 +226,18 @@ export async function executeConvertPoints(
       );
       return;
     }
+
+    // Registro de transacción exitosa (Puntos ➔ NXT)
+    const nxtNumber = Number(amountUnits) / Number(decimalsFactor);
+    logTransaction({
+      userId: interaction.user.id,
+      type: "CONVERT_POINTS_TO_NXT",
+      amountNxt: nxtNumber,
+      amountPoints: pointsNumber,
+      blockIndex: mintResult.blockIndex?.toString(),
+      status: "SUCCESS",
+      timestamp: Date.now(),
+    });
 
     await interaction.editReply(
       `✅ **¡Conversión exitosa!**\n\n` +

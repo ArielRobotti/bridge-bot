@@ -11,6 +11,7 @@ import { NXT_DECIMALS } from "../../config/constants.js"
 import { getDiscordUser, ensureNexusRole, formatTransferError, NexusUser } from "../helpers.js";
 import { bridgeTransferNXT } from "../../nexus/client.js"
 import { sendNotificationEmail } from "../../utils/mailer.js";
+import { logTransaction } from "../../services/transactionLogger.js";
 
 function formatNexusName(user?: NexusUser): string {
   const nexusName = user?.name?.[0];
@@ -116,6 +117,15 @@ export async function handleTransferConfirm(interaction: ButtonInteraction): Pro
 
     if (transfer.ok) {
       const destNexusName = destResult.user?.name?.[0] ? ` (${destResult.user.name[0]})` : "";
+      logTransaction({
+        userId: fromUserId,
+        targetUserId: toUserId,
+        type: "P2P_TRANSFER",
+        amountNxt: amountNumber,
+        blockIndex: transfer.blockIndex?.toString(),
+        status: "SUCCESS",
+        timestamp: Date.now()
+      });
 
       await interaction.editReply({
         content:
@@ -159,3 +169,7 @@ export async function handleTransferConfirm(interaction: ButtonInteraction): Pro
     });
   }
 }
+
+// function logTransaction(arg0: { userId: string; targetUserId: string; type: string; amountNxt: number; blockIndex: string | undefined; status: string; timestamp: number; }) {
+//   throw new Error("Function not implemented.");
+// }

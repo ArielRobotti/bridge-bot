@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction, MessageFlags } from "discord.js";
 import { getDiscordUser, ensureNexusRole, formatAmount} from "../helpers.js";
-import { getNxstBalance } from "../../nexus/ledger.js";
+import { getNxtBalance } from "../../nexus/ledger.js";
 
 export async function handleBalance(interaction: ChatInputCommandInteraction): Promise<void> {
   await interaction.deferReply({ flags: MessageFlags.Ephemeral });
@@ -11,7 +11,7 @@ export async function handleBalance(interaction: ChatInputCommandInteraction): P
       return;
     }
     await ensureNexusRole(interaction.guild, interaction.user.id);
-    const balance = await getNxstBalance(result.user!.principal);
+    const balance = await getNxtBalance(result.user!.principal);
 
     await interaction.editReply(`Tu balance NXT: **${formatAmount(balance)}**`);
   } catch (err) {

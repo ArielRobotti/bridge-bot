@@ -27,6 +27,9 @@ pnpm-debug.log*
 .ic-assets/
 canister_ids.json
 
+# data storage
+transactions.db
+
 # IDEs and Editors
 .vscode/
 .idea/
