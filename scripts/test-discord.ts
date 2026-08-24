@@ -41,6 +41,18 @@ import "dotenv/config";
 import { getDiscordClient } from "../src/discord/client.js";
 import { registerEvents } from "../src/discord/events.js";
 
+import http from "http";
+
+// Iniciar servidor HTTP keep-alive para evitar que Render hiberne la app
+const PORT = process.env.PORT || 3000;
+
+http.createServer((req, res) => {
+  res.writeHead(200, { "Content-Type": "text/plain" });
+  res.end("Nexus Bridge Bot is Alive!");
+}).listen(PORT, () => {
+  console.log(`[HTTP] Servidor keep-alive escuchando en el puerto ${PORT}`);
+});
+
 console.log("[test] 🚀 Iniciando conexión a Discord...");
 
 try {
