@@ -13,8 +13,6 @@ import { slashHandlers} from "./commands/index.js";
 import { handleTransferConfirm, executeConvertNxt, executeConvertPoints, handleWalletRefresh  } from "./commands/index.js";
 import { trackMessage, seedMessageHistory } from "../services/messageTracker.js";
 
-// Dentro de registerEvents(client: Client):
-
 
 
 export function registerEvents(client: Client): void {

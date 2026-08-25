@@ -21,6 +21,8 @@ function formatNexusName(user?: NexusUser): string {
 export async function handleTransfer(interaction: ChatInputCommandInteraction): Promise<void> {
   await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
+  console.log(interaction)
+
   const amountNumber = interaction.options.getNumber("monto", true);
   const destinationUser = interaction.options.getUser("usuario", true);
 
